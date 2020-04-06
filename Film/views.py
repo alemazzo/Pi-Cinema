@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import threading as th    
 import subprocess
+from django.conf import settings
 
 def randomString(stringLength=10):
     """Generate a random string of fixed length """
@@ -55,7 +56,6 @@ def CheckCache(request):
 
 def create_frame(path, f):
     print("Estrazione copertina...")
-    #cap = cv2.VideoCapture(path)
     f.imagePath = f'thumbnails/films/{f.pk}.jpg'
     subprocess.call(['ffmpeg', '-i', f.videoPath, '-ss', '00:00:03.000', '-vframes', '1', './media/' + f.imagePath])
     f.save()
@@ -63,6 +63,7 @@ def create_frame(path, f):
     pass
 
 def get_duration(file):
+    print(f"File for duration : {file}")
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                              "format=duration", "-of",
                              "default=noprint_wrappers=1:nokey=1", file],
@@ -70,17 +71,18 @@ def get_duration(file):
         stderr=subprocess.STDOUT)
     return float(result.stdout)
 
-def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data"):
+def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data/"):
     print("Creazione film...")
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
     f.save()
-    os.rename(path, f.videoPath)
+    os.rename("." + path, f.videoPath)
+    #f.duration = get_duration(f.videoPath)
+    #f.save()
+    create_frame(f.videoPath, f)
+    f.save()
     f.duration = get_duration(f.videoPath)
     f.save()
-    create_frame(f.videoPath, f)    
-    
-   
 
 @csrf_exempt
 def Upload(request):
@@ -93,7 +95,8 @@ def Upload(request):
             print("Salvataggio file...")
             file = form.save().file.url
             pk = form.instance.pk
-            th.Thread(target=handle_film, args=(pk, file )).start()
+            #th.Thread(target=handle_film, args=(pk, file, )).start()
+            handle_film(pk, file)
             return HttpResponse("SAVED")
 
         return HttpResponse("ERROR")
