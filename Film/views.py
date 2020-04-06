@@ -6,10 +6,8 @@ from .models import Film, FilmUploadForm
 import os, shutil, string, random, datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-import cv2
 import threading as th    
-from moviepy.video.io.VideoFileClip import VideoFileClip
-    
+import subprocess
 
 def randomString(stringLength=10):
     """Generate a random string of fixed length """
@@ -57,36 +55,38 @@ def CheckCache(request):
 
 def create_frame(path, f):
     print("Estrazione copertina...")
-    cap = cv2.VideoCapture(path)
+    #cap = cv2.VideoCapture(path)
     f.imagePath = f'thumbnails/films/{f.pk}.jpg'
-    i=0
-    for i in range(500):
-        ret, frame = cap.read()
-        
-        if ret == False:
-            break
-        if i == 499:
-            cv2.imwrite('Static/' + f.imagePath, frame)
+    #i=0
+    #for i in range(500):
+    #    ret, frame = cap.read()
+    #    
+    #    if ret == False:
+    #        break
+    #    if i == 499:
+    #        cv2.imwrite('Static/' + f.imagePath, frame)
+    subprocess.call(['ffmpeg', '-i', f.videoPath, '-ss', '00:00:03.000', '-vframes', '1', './Static/' + f.imagePath])
     f.save()
     print("Fine")
     pass
 
 def get_duration(file):
-    clip = VideoFileClip(file)
-    dur = int(clip.duration)
-    hrs, mins, secs = dur//60//60, dur//60%60, dur%60
-    hrs = "0"+str(hrs) if(hrs<10) else str(hrs)
-    mins = "0"+str(mins) if(mins<10) else str(mins)
-    secs = "0"+str(secs) if(secs<10) else str(secs)
-    return hrs +":"+ mins +":"+ secs
+    print("")
+    #clip = VideoFileClip(file)
+    #dur = int(clip.duration)
+    #hrs, mins, secs = dur//60//60, dur//60%60, dur%60
+    #hrs = "0"+str(hrs) if(hrs<10) else str(hrs)
+    #mins = "0"+str(mins) if(mins<10) else str(mins)
+    #secs = "0"+str(secs) if(secs<10) else str(secs)
+    #return hrs +":"+ mins +":"+ secs
 
-def handle_film(pk, path, dest = "C:\\Users\\alema\\Desktop\\Pi-Cinema\\DATA\\"):
+def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/DATA/"):
     print("Creazione film...")
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
     f.save()
     os.rename(path, f.videoPath)
-    f.duration = get_duration(f.videoPath)
+    #f.duration = get_duration(f.videoPath)
     f.save()
     create_frame(f.videoPath, f)    
     

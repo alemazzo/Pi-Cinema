@@ -25,7 +25,7 @@ SECRET_KEY = '&gq+ar-3v8s%eqfg#!+&u07(1m@z7$ab!vn_ohvm^^@z99#ynx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.1.5']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.1.5', "192.168.1.11"]
 
 
 # Application definition
@@ -57,7 +57,7 @@ ROOT_URLCONF = 'Pi-Cinema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['Static'],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,11 +127,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/Static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "Static/"),
-    os.path.join(BASE_DIR, "DATA/"),
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-]
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "Static/"),
+#    os.path.join(BASE_DIR, "DATA/"),
+#]
 
 VIDEO_BASE_PATH = ''
