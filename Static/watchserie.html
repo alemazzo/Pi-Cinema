@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{episodio}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!--Javascript-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'afterglow.min.js' %}"></script>
+    <script>
+        function updateWatch() {
+            $.get(
+                '/serietv/update/{{episodio.id}}/'
+            );
+        }
+
+        setInterval(updateWatch, 5000);
+    </script>
+</head>
+
+<body>
+
+    <video class="afterglow" id="myvideo" width="640" height="360" data-autoresize="none">
+        {% load static %}
+        <source type="video/mp4" src='{% static link %}' />
+    </video>
+</body>
+<html>

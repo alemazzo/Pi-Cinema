@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Pi-Cinema">
+    <meta name="author" content="Alessandro Mazzoli">
+    <title>Pi-Cinema</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!--Javascript-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <link href="https://vjs.zencdn.net/7.7.5/video-js.css" rel="stylesheet" />
+
+    <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+
+    <!-- Favicon Icon -->
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <!-- Bootstrap core CSS-->
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="{% static 'css/osahan.css' %}" rel="stylesheet">
+    <!-- Owl Carousel -->
+    <link rel="stylesheet" href="{% static 'vendor/owl-carousel/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/owl-carousel/owl.theme.css' %}">
+    <style>
+        .loader {
+            border: 16px solid #f3f3f3;
+            /* Light grey */
+            border-top: 16px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            width: 150px;
+            height: 150px;
+            left: 50%;
+            top: 50%;
+            position: absolute;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        var watchUpdateInterval;
+        var divs = ['watch-div', 'film-div', 'tvseries-div', 'uploadfilm-div'];
+
+
+        //#region Player
+        function updateWatch(type, id) {
+            $.get(
+                '/' + type + '/update/' + id + '/'
+            );
+        }
+
+        function watchFilm(id) {
+
+            //Open the watch div
+            openWatch();
+            $("#loader").show();
+            $("#my-video").hide();
+            $.get('/film/watch/' + id, function(film) {
+                //Start cache interval
+                watchUpdateInterval = setInterval(updateWatch, 5000, 'film', id);
+                //Set the video data
+                $("#my-video").poster = "/Static/" + film.imagePath;
+                document.getElementById('source').src = "/Static/" + film.cachePath;
+                $("#loader").hide();
+                $("#my-video").show();
+                //Load video data
+                document.getElementById('my-video').load();
+            });
+
+        }
+
+        function openWatch() {
+            //Close all other divs
+            for (var i = 0; i < divs.length; i++) {
+                if (divs[i] != "watch-div") {
+                    $("#" + divs[i]).hide();
+                }
+            }
+            //Show watch div
+            $("#watch-div").show();
+
+
+        }
+
+        function closeWatch() {
+            //Pause the video
+            document.getElementById('source').src = "";
+            document.getElementById('my-video').load();
+            //Hide the video
+            $("#watch-div").hide();
+            //Clear the cache interval
+            clearInterval(watchUpdateInterval);
+        }
+
+        //#endregion
+
+
+        //#region Film
+        function createFilm(film) {
+            //cretae film card
+            var htmlstring = '<div onclick="watchFilm(' + film.pk + ');" class="col-xl-3 col-sm-6 mb-3">\
+                                <div class="video-card">\
+                                    <div class="video-card-image">\
+                                        <a class="play-icon"  href="#"><i class="fas fa-play-circle"></i></a>\
+                                        <a href="#"><img class="img-fluid" src="/Static/' + film.imagePath + '" alt=""></a>\
+                                        <div class="time">' + film.duration + '</div>\
+                                    </div>\
+                                    <div class="video-card-body">\
+                                        <div class="video-title">\
+                                            <a href="#" style="font-size: 20px">' + film.title + ' (' + film.year + ')</a>\
+                                        </div>\
+                                        <div class="video-view">\
+                                            <i class="fas fa-calendar-alt"></i> 11 Months ago\
+                                        </div>\
+                                    </div>\
+                                </div>\
+                            </div>';
+            return htmlstring;
+        }
+
+        function loadFilm(query = null) {
+            //Load film
+            //For each film append the created film
+
+            $.get('/api/film/', function(films) {
+                $("#film-content").html("");
+                $("#film-content").append('<div class="col-md-12">\
+                            <div class="main-title">\
+                                <h3>Film</h3>\
+                            </div>\
+                        </div>');
+                for (var i = 0; i < films.length; i++) {
+                    var film = films[i];
+                    $("#film-content").append(createFilm(film));
+                }
+            });
+        }
+
+        function openFilm() {
+
+
+            for (var i = 0; i < divs.length; i++) {
+                if (divs[i] != "film-div") {
+                    $("#" + divs[i]).hide();
+                }
+            }
+
+            $("#film-div").show();
+            closeWatch();
+
+            loadFilm();
+
+            $("#tvseries-label").removeClass('active');
+            $("#uploadfilm-label").removeClass('active');
+            $("#uploadtvserie-label").removeClass('active');
+            $("#film-label").addClass('active');
+
+        }
+
+        //#endregion
+
+
+        //#region UploadFilm
+        function uploadFile() {
+            var form_data = new FormData();
+            form_data.append('file', $('#film-file')[0].files[0]);
+            form_data.append('title', $('#film-title').val());
+            form_data.append('year', $('#film-year').val());
+            $.ajax({
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            percentComplete = parseInt(percentComplete * 100);
+                            $("#progress-bar").html(percentComplete + "%");
+                            $("#progress-bar").width(percentComplete + "%");
+
+                            if (percentComplete === 100) {
+                                $("#progress-bar").html("100%");
+                                $("#progress-bar").width("100%");
+
+                            }
+
+                        }
+                    }, false);
+
+                    return xhr;
+                },
+                url: '/film/upload/',
+                type: "POST",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    $("#progress-bar").html("0%");
+                    $("#progress-bar").width("0%");
+                    alert("Upload Completed");
+                    $("#uploadFilm-modal").modal('hide');
+                    openFilm();
+                }
+            });
+        }
+
+
+        function openUploadFilm() {
+
+            $("#uploadFilm-modal").modal();
+
+
+        }
+        //#endregion
+
+        function openTvSeries() {
+
+
+            for (var i = 0; i < divs.length; i++) {
+                if (divs[i] != "tvseries-div") {
+                    $("#" + divs[i]).hide();
+                }
+            }
+
+            $("#tvseries-div").show();
+            closeWatch();
+
+            $("#tvseries-label").addClass('active');
+            $("#uploadfilm-label").removeClass('active');
+            $("#uploadtvserie-label").removeClass('active');
+            $("#film-label").removeClass('active');
+
+        }
+
+
+
+
+        $(document).ready(function() {
+            openFilm();
+        });
+    </script>
+</head>
+
+<body id="page-top">
+    <nav class="navbar navbar-expand navbar-light bg-white static-top osahan-nav sticky-top">
+        &nbsp;&nbsp;
+        <button class="btn btn-link btn-sm text-secondary order-1 order-sm-0" id="sidebarToggle">
+         <i class="fas fa-bars"></i>
+         </button> &nbsp;&nbsp;
+        <a class="navbar-brand mr-1" href="#">
+            <img style="height: 60px; width: auto;" class="img-fluid" alt="" src="{% static 'img/logo.png' %}">
+        </a>
+        <!-- Navbar Search -->
+        <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-5 my-2 my-md-0 osahan-navbar-search">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for...">
+                <div class="input-group-append">
+                    <button class="btn btn-light" type="button">
+                  <i class="fas fa-search"></i> 
+                  </button>
+                </div>
+            </div>
+        </form>
+    </nav>
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="sidebar navbar-nav">
+            <!--
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            -->
+            <li onclick="openFilm();" id="film-label" class="nav-item active">
+                <a class="nav-link" href="#film">
+                    <i class="fas fa-fw fa-film"></i>
+                    <span>Movie</span>
+                </a>
+            </li>
+            <li onclick="openTvSeries();" id="tvseries-label" class="nav-item">
+                <a class="nav-link" href="#tvseries">
+                    <i class="fas fa-fw fa-tv"></i>
+                    <span>Tv Series</span>
+                </a>
+            </li>
+            <li onclick="openUploadFilm();" id="uploadfilm-label" class="nav-item">
+                <a class="nav-link" href="#uploadfilm">
+                    <i class="fas fa-fw fa-cloud-upload-alt"></i>
+                    <span>Upload Film</span>
+                </a>
+            </li>
+            <li id="uploadtvseries-label" class="nav-item">
+                <a class="nav-link" href="">
+                    <i class="fas fa-fw fa-cloud-upload-alt"></i>
+                    <span>Upload Tv Series</span>
+                </a>
+            </li>
+        </ul>
+
+        <div id="content-wrapper">
+            <div class="container-fluid pb-0">
+                <div class="modal fade" id="uploadFilm-modal">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Upload Film</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                            </div>
+                            <div class="progress" style="width:100%;">
+                                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">0%</div>
+                            </div>
+
+                            <!-- Modal body -->
+                            <form id="upload-form">
+
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="title">Title:</label>
+                                        <input type="text" class="form-control" id="film-title" name="title" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="year">Year:</label>
+                                        <input type="text" class="form-control" id="film-year" name="year" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="file">File:</label>
+                                        <input type="file" class="form-control" id="film-file" name="file">
+                                    </div>
+                                </div>
+
+
+                                <!-- Modal footer -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                                    <button type="button" onclick="uploadFile();" class="btn btn-secondary">Upload</button>
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="top-mobile-search">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form class="mobile-search">
+                                <div class="input-group">
+                                    <input type="text" placeholder="Search for..." class="form-control">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-dark"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+                <div id="film-div" class="video-block section-padding">
+                    <div class="row" id="film-content">
+
+
+                    </div>
+                </div>
+
+
+                <div id="tvseries-div" class="video-block section-padding" style="display:none">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Tv Series</h3>
+                        </div>
+                    </div>
+
+
+                    <div class="modal fade" id="createTvSeries-modal">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Registrati</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+
+                                <!-- Modal body -->
+                                <form id="signup-form" action="" method="post">
+
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="name">Nome</label>
+                                            <input type="text" class="form-control" id="signup-username" name="username" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="signup-email">Email address:</label>
+                                            <input type="email" class="form-control" id="signup-email" name="signup-email" value="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="signup-password">Password:</label>
+                                            <input type="password" class="form-control" id="signup-password" name="signup-password">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="signup-password-confirm">Confirm Password:</label>
+                                            <input type="password" class="form-control" id="signup-password-confirm" name="signup-password-confirm">
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                                        <button type="button" id="signup-submit" class="btn btn-secondary">Registrati</button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div id="watch-div" class="video-block section-padding" style="display:none">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <h3 id="watch-title"></h3>
+                        </div>
+                    </div>
+                    <div class="row" id="watch-content">
+                        <div id="loader" class="loader"></div>
+                        <video id="my-video" class="" controls preload="metadata" width="100%" height="auto">
+                            <source id="source" src="" type="video/mp4" />
+                          </video>
+
+                    </div>
+                </div>
+
+                <div id="uploadfilm-div" class="video-block section-padding" style="display:none">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="main-title">
+                                <h3>Upload Film</h3>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" id="filmform">
+
+                        </div>
+                        <div class="progress col-md-8" style="margin:10px">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">0%</div>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!-- /#wrapper -->
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    <!-- Owl Carousel -->
+    <script src="{% static 'vendor/owl-carousel/owl.carousel.js' %}"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script src="https://vjs.zencdn.net/7.7.5/video.js"></script>
+</body>
+
+</html>
