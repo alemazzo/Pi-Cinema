@@ -25,9 +25,9 @@ def Watch(request, id):
 
     film = Film.objects.get(id=id)
     if film.cachePath == "":
-        link = f"./Static/tmp/{randomString()}.mp4"
+        link = f"./media/tmp/{randomString()}.mp4"
         film.lastWatch = timezone.now()
-        film.cachePath = link.replace('./Static/', '')
+        film.cachePath = link.replace('./media/', '')
         film.save()
         shutil.copyfile(film.videoPath, link)
         
@@ -44,7 +44,7 @@ def CheckCache(request):
     films = Film.objects.all()
     for film in films:
         if film.cachePath != "" and (timezone.now() - film.lastWatch).total_seconds() > 20:
-            os.remove(f'./Static/{film.cachePath}')
+            os.remove(f'./media/{film.cachePath}')
             film.cachePath = ""
             film.save()
     return HttpResponse("")
@@ -57,36 +57,26 @@ def create_frame(path, f):
     print("Estrazione copertina...")
     #cap = cv2.VideoCapture(path)
     f.imagePath = f'thumbnails/films/{f.pk}.jpg'
-    #i=0
-    #for i in range(500):
-    #    ret, frame = cap.read()
-    #    
-    #    if ret == False:
-    #        break
-    #    if i == 499:
-    #        cv2.imwrite('Static/' + f.imagePath, frame)
-    subprocess.call(['ffmpeg', '-i', f.videoPath, '-ss', '00:00:03.000', '-vframes', '1', './Static/' + f.imagePath])
+    subprocess.call(['ffmpeg', '-i', f.videoPath, '-ss', '00:00:03.000', '-vframes', '1', './media/' + f.imagePath])
     f.save()
     print("Fine")
     pass
 
 def get_duration(file):
-    print("")
-    #clip = VideoFileClip(file)
-    #dur = int(clip.duration)
-    #hrs, mins, secs = dur//60//60, dur//60%60, dur%60
-    #hrs = "0"+str(hrs) if(hrs<10) else str(hrs)
-    #mins = "0"+str(mins) if(mins<10) else str(mins)
-    #secs = "0"+str(secs) if(secs<10) else str(secs)
-    #return hrs +":"+ mins +":"+ secs
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                             "format=duration", "-of",
+                             "default=noprint_wrappers=1:nokey=1", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    return float(result.stdout)
 
-def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/DATA/"):
+def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data"):
     print("Creazione film...")
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
     f.save()
     os.rename(path, f.videoPath)
-    #f.duration = get_duration(f.videoPath)
+    f.duration = get_duration(f.videoPath)
     f.save()
     create_frame(f.videoPath, f)    
     

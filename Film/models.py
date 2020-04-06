@@ -11,7 +11,7 @@ class Film(models.Model):
     imagePath = models.TextField(null=True)
     cachePath = models.TextField(blank=True)
     lastWatch = models.DateTimeField(null=True)
-    file = models.FileField(upload_to="Static/upload", null=True)
+    file = models.FileField(upload_to="upload", null=True)
 
     class Meta:
         verbose_name = ("Film")
