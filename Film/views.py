@@ -6,10 +6,11 @@ from .models import Film, FilmUploadForm
 import os, shutil, string, random, datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-import threading as th    
+from multiprocessing import Process
 import subprocess
 from django.conf import settings
 import time
+
 
 def randomString(stringLength=10):
     """Generate a random string of fixed length """
@@ -95,8 +96,7 @@ def Upload(request):
             print("Salvataggio file...")
             file = form.save().file.url
             pk = form.instance.pk
-            #th.Thread(target=handle_film, args=(pk, file )).start()
-            handle_film(pk, file)
+            Process(target = handle_film, args = (pk, file,)).start()
             return HttpResponse("SAVED")
 
         return HttpResponse("ERROR")
