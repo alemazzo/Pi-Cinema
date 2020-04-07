@@ -45,10 +45,10 @@ def Watch(request, id):
         film.caching = True
         film.save()
         Thread(target = cacheFile, args = (film.videoPath, link, id, )).start()
-        return HttpResponse(None)
+        return HttpResponse("None")
     else:
         if film.caching == True:
-            return HttpResponse(None)
+            return HttpResponse("None")
         else:
             return redirect(f'/api/film/{film.pk}')
 
