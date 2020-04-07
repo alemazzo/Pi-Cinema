@@ -95,7 +95,7 @@ def Upload(request):
             file = form.save().file.url
             pk = form.instance.pk
             #th.Thread(target=handle_film, args=(pk, file )).start()
-            handle_file(pk, file)
+            handle_film(pk, file)
             return HttpResponse("SAVED")
 
         return HttpResponse("ERROR")
