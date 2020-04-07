@@ -7,6 +7,7 @@ import os, shutil, string, random, datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from multiprocessing import Process
+from threading import Thread
 import subprocess
 from django.conf import settings
 import time
@@ -108,9 +109,9 @@ def Upload(request):
             print("Salvataggio file...")
             file = form.save().file.url
             pk = form.instance.pk
-            pr = Process(target = handle_film, args = (pk, file,))
-            pr.daemon = True
-            pr.start()
+            tr = Thread(target = handle_film, args = (pk, file,), daemon = True)
+            tr.daemon = True
+            tr.start()
             return HttpResponse("SAVED")
 
         return HttpResponse("ERROR")
