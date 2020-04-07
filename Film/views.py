@@ -108,7 +108,9 @@ def Upload(request):
             print("Salvataggio file...")
             file = form.save().file.url
             pk = form.instance.pk
-            Process(target = handle_film, args = (pk, file,)).start()
+            pr = Process(target = handle_film, args = (pk, file,))
+            pr.daemon = True
+            pr.start()
             return HttpResponse("SAVED")
 
         return HttpResponse("ERROR")
