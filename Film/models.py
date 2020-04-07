@@ -8,10 +8,12 @@ class Film(models.Model):
     year = models.CharField(max_length=4, null=True)
     duration = models.TextField(null=True)
     videoPath = models.TextField()
-    imagePath = models.TextField(null=True)
+    imagePath = models.TextField(null=True, default='img/creating.png')
     cachePath = models.TextField(blank=True)
     lastWatch = models.DateTimeField(null=True)
     file = models.FileField(upload_to="upload", null=True)
+    creating = models.BooleanField(default=True)
+    caching = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = ("Film")

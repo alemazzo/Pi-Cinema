@@ -5,4 +5,4 @@ from Film.models import Film
 class FilmSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Film
-        fields = ['pk','title', 'year', 'videoPath', 'imagePath', 'cachePath', 'lastWatch', 'duration']
+        fields = ['pk','title', 'year', 'videoPath', 'imagePath', 'cachePath', 'lastWatch', 'duration', 'caching']

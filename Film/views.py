@@ -24,17 +24,25 @@ def HomePage(request):
     films = serializers.serialize('json', films)
     return JsonResponse(films, safe = False)
 
+
+def cacheFile(src, dst):
+    shutil.copyfile(src, dst)
+
+
+
 def Watch(request, id):
 
     film = Film.objects.get(id=id)
-    if film.cachePath == "":
+    if film.cachePath == "" or film.caching:
         link = f"./media/tmp/{randomString()}.mp4"
         film.lastWatch = timezone.now()
         film.cachePath = link.replace('./media/', '')
+        film.caching = True
         film.save()
-        shutil.copyfile(film.videoPath, link)
-        
-    return redirect(f'/api/film/{film.pk}')
+        Process(target = cacheFile, args = (film.videoPath, link, )).start()
+        return HttpResponse(None)
+    else:
+        return redirect(f'/api/film/{film.pk}')
 
 
 def UpdateWatch(request, id):
@@ -61,9 +69,6 @@ def create_frame(path, f):
     #cap = cv2.VideoCapture(path)
     f.imagePath = f'thumbnails/films/{f.pk}.jpg'
     subprocess.call(['ffmpeg', '-i', f.videoPath, '-ss', '00:00:03.000', '-vframes', '1', './media/' + f.imagePath])
-    f.save()
-    print("Fine")
-    pass
 
 def get_duration(file):
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
@@ -73,16 +78,18 @@ def get_duration(file):
         stderr=subprocess.STDOUT)
     return time.strftime('%H:%M:%S', time.gmtime(int(result.stdout)))
 
-def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data/"):
+def handle_film(pk, path):
     print("Creazione film...")
+    dest = settings.DATA_BASE_PATH + 'film/'
     path = '.' + path
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
-    f.save()
     os.rename(path, f.videoPath)
     f.duration = get_duration(f.videoPath)
-    f.save()
     create_frame(f.videoPath, f)    
+    f.creating = False
+    f.save()
+    print("Fine")
     
 
 @csrf_exempt

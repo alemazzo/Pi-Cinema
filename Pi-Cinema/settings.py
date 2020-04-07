@@ -133,4 +133,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 MEDIA_URL = '/media/'
 
 
-VIDEO_BASE_PATH = ''
+DATA_BASE_PATH = '/home/pi/data/'

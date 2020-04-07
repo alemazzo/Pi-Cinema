@@ -69,23 +69,33 @@
             );
         }
 
+        function waitUntilFilmIsReady(id) {
+            console.log("Waiting for caching...");
+            $.get('/film/watch/' + id, function(film) {
+                if (film != null) {
+                    //Start cache interval
+                    watchUpdateInterval = setInterval(updateWatch, 5000, 'film', id);
+                    //Set the video data
+                    $("#my-video").poster = "/media/" + film.imagePath;
+                    document.getElementById('source').src = "/media/" + film.cachePath;
+                    $("#loader").hide();
+                    $("#my-video").show();
+                    //Load video data
+                    document.getElementById('my-video').load();
+                } else {
+                    setTimeout(waitUntilFilmIsReady, 1000, id);
+                }
+            });
+
+        }
+
         function watchFilm(id) {
 
             //Open the watch div
             openWatch();
             $("#loader").show();
             $("#my-video").hide();
-            $.get('/film/watch/' + id, function(film) {
-                //Start cache interval
-                watchUpdateInterval = setInterval(updateWatch, 5000, 'film', id);
-                //Set the video data
-                $("#my-video").poster = "/media/" + film.imagePath;
-                document.getElementById('source').src = "/media/" + film.cachePath;
-                $("#loader").hide();
-                $("#my-video").show();
-                //Load video data
-                document.getElementById('my-video').load();
-            });
+            waitUntilFilmIsReady(id);
 
         }
 
