@@ -79,8 +79,8 @@
                 //Start cache interval
                 watchUpdateInterval = setInterval(updateWatch, 5000, 'film', id);
                 //Set the video data
-                $("#my-video").poster = "/Static/" + film.imagePath;
-                document.getElementById('source').src = "/Static/" + film.cachePath;
+                $("#my-video").poster = "/media/" + film.imagePath;
+                document.getElementById('source').src = "/media/" + film.cachePath;
                 $("#loader").hide();
                 $("#my-video").show();
                 //Load video data
@@ -122,7 +122,7 @@
                                 <div class="video-card">\
                                     <div class="video-card-image">\
                                         <a class="play-icon"  href="#"><i class="fas fa-play-circle"></i></a>\
-                                        <a href="#"><img class="img-fluid" src="/Static/' + film.imagePath + '" alt=""></a>\
+                                        <a href="#"><img class="img-fluid" src="/media/' + film.imagePath + '" alt=""></a>\
                                         <div class="time">' + film.duration + '</div>\
                                     </div>\
                                     <div class="video-card-body">\
