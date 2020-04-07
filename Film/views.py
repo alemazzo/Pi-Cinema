@@ -53,8 +53,8 @@ def Watch(request, pk):
             return redirect(f'/api/film/{film.pk}')
 
 
-def UpdateWatch(request, id):
-    film = Film.objects.get(id=id)
+def UpdateWatch(request, pk):
+    film = Film.objects.get(id=pk)
     film.lastWatch = timezone.now()
     film.save()
     return HttpResponse("UPDATED")
