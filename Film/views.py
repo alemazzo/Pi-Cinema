@@ -26,25 +26,25 @@ def HomePage(request):
     return JsonResponse(films, safe = False)
 
 
-def cacheFile(src, dst, id):
+def cacheFile(src, dst, pk):
     print("Start caching file")
     shutil.copyfile(src, dst)
     print("File Cached")
-    film = Film.objects.get(id=id)
+    film = Film.objects.get(id=pk)
     film.caching = False
     film.save()
 
 
-def Watch(request, id):
+def Watch(request, pk):
 
-    film = Film.objects.get(id=id)
+    film = Film.objects.get(id=pk)
     if film.cachePath == "":
         link = f"./media/tmp/{randomString()}.mp4"
         film.lastWatch = timezone.now()
         film.cachePath = link.replace('./media/', '')
         film.caching = True
         film.save()
-        Thread(target = cacheFile, args = (film.videoPath, link, id, )).start()
+        Thread(target = cacheFile, args = (film.videoPath, link, pk, )).start()
         return HttpResponse("None")
     else:
         if film.caching == True:
