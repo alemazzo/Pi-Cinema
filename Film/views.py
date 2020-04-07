@@ -72,7 +72,7 @@ def get_duration(file):
         stderr=subprocess.STDOUT)
     return time.strftime('%H:%M:%S', int(result.stdout))
 
-def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data"):
+def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data/"):
     print("Creazione film...")
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
@@ -82,7 +82,6 @@ def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data"):
     f.save()
     create_frame(f.videoPath, f)    
     
-   
 
 @csrf_exempt
 def Upload(request):
