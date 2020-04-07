@@ -74,6 +74,7 @@ def get_duration(file):
 
 def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data/"):
     print("Creazione film...")
+    path = '.' + path
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
     f.save()
