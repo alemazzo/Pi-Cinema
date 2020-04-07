@@ -83,13 +83,10 @@ def get_duration(file):
         stderr=subprocess.STDOUT)
     return time.strftime('%H:%M:%S', time.gmtime(int(result.stdout)))
 
-def handle_film(form):
-    print("Salvataggio file...")
-    file = form.save().file.url
-    pk = form.instance.pk
+def handle_film(pk, path):
     print("Creazione film...")
     dest = settings.DATA_BASE_PATH + 'film/'
-    path = '.' + file
+    path = '.' + path
     f = Film.objects.get(pk = pk)
     f.videoPath = f'{dest}{f.pk}-{f.title}.mp4'
     os.rename(path, f.videoPath)
@@ -108,7 +105,10 @@ def Upload(request):
     else:
         form = FilmUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            pr = Process(target = handle_film, args = (form, ))
+            print("Salvataggio file...")
+            file = form.save().file.url
+            pk = form.instance.pk
+            pr = Process(target = handle_film, args = (pk, file,))
             pr.daemon = True
             pr.start()
             return HttpResponse("SAVED")
