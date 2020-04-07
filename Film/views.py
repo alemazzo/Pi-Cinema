@@ -27,7 +27,9 @@ def HomePage(request):
 
 
 def cacheFile(src, dst, id):
+    print("Start caching file")
     shutil.copyfile(src, dst)
+    print("File Cached")
     film = Film.objects.get(id=id)
     film.caching = False
     film.save()
@@ -42,7 +44,7 @@ def Watch(request, id):
         film.cachePath = link.replace('./media/', '')
         film.caching = True
         film.save()
-        Thread(target = cacheFile, args = (film.videoPath, link, id, ), daemon = True).start()
+        Thread(target = cacheFile, args = (film.videoPath, link, id, )).start()
         return HttpResponse(None)
     else:
         if film.caching == True:
