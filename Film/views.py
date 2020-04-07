@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import threading as th    
 import subprocess
+from django.conf import settings
+import time
 
 def randomString(stringLength=10):
     """Generate a random string of fixed length """
@@ -68,7 +70,7 @@ def get_duration(file):
                              "default=noprint_wrappers=1:nokey=1", file],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
-    return float(result.stdout)
+    return time.strftime('%H:%M:%S', int(result.stdout))
 
 def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data"):
     print("Creazione film...")
