@@ -44,7 +44,7 @@ def Watch(request, pk):
         film.cachePath = link.replace('./media/', '')
         film.caching = True
         film.save()
-        Thread(target = cacheFile, args = (film.videoPath, link, pk, )).start()
+        Thread(target = cacheFile, args = (film.videoPath, link, pk, ), daemon = True).start()
         return HttpResponse("None")
     else:
         if film.caching == True:
