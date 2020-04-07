@@ -70,7 +70,7 @@ def get_duration(file):
                              "default=noprint_wrappers=1:nokey=1", file],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
-    return time.strftime('%H:%M:%S', int(result.stdout))
+    return time.strftime('%H:%M:%S', time.gmtime(int(result.stdout)))
 
 def handle_film(pk, path, dest = "/home/pi/Pi-Cinema/media/data/"):
     print("Creazione film...")
