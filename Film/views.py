@@ -28,7 +28,7 @@ def HomePage(request):
 
 def cacheFile(src, dst, pk):
     print("Start caching file")
-    shutil.copy2(src, dst)
+    subprocess.call(f'cp "{src}" "{dst}"', shell=True)
     print("File Cached")
     film = Film.objects.get(id=pk)
     film.caching = False
