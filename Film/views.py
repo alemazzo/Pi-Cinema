@@ -28,7 +28,7 @@ def HomePage(request):
 
 def cacheFile(src, dst, pk):
     print("Start caching file")
-    shutil.copyfile(src, dst)
+    shutil.copy2(src, dst)
     print("File Cached")
     film = Film.objects.get(id=pk)
     film.caching = False
